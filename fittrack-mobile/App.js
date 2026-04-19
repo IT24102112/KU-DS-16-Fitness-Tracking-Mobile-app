@@ -13,9 +13,13 @@ import RegisterScreen from './src/screens/RegisterScreen';
 // User screens
 import HomeScreen from './src/screens/HomeScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
-import WorkoutListScreen from './src/screens/workout/WorkoutListScreen';
-import WorkoutFormScreen from './src/screens/workout/WorkoutFormScreen';
-import WorkoutDetailScreen from './src/screens/workout/WorkoutDetailScreen';
+//import WorkoutListScreen from './src/screens/workout/WorkoutListScreen';
+//import WorkoutFormScreen from './src/screens/workout/WorkoutFormScreen';
+//import WorkoutDetailScreen from './src/screens/workout/WorkoutDetailScreen';
+
+// Progress screens
+import ProgressListScreen from './src/screens/ProgressListScreen';
+import ProgressFormScreen from './src/screens/ProgressFormScreen';
 
 // Admin screens
 import AdminDashboard from './src/screens/admin/AdminDashboard';
@@ -40,10 +44,12 @@ function UserStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Home" component={HomeScreen} />
       <Stack.Screen name="Profile" component={ProfileScreen} />
-      <Stack.Screen name="WorkoutList" component={WorkoutListScreen} />
-      <Stack.Screen name="WorkoutDetail" component={WorkoutDetailScreen} />
-      <Stack.Screen name="WorkoutForm" component={WorkoutFormScreen} />
-      {/* Team members add their screens here */}
+      {/* <Stack.Screen name="WorkoutList" component={WorkoutListScreen} /> */}
+      {/* <Stack.Screen name="WorkoutDetail" component={WorkoutDetailScreen} /> */}
+      {/* <Stack.Screen name="WorkoutForm" component={WorkoutFormScreen} /> */}
+      {/* Progress Tracking Screens */}
+      <Stack.Screen name="ProgressList" component={ProgressListScreen} />
+      <Stack.Screen name="ProgressForm" component={ProgressFormScreen} />
     </Stack.Navigator>
   );
 }

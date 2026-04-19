@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export const API_BASE_URL = 'http://10.188.12.68:5000/api';
+export const API_BASE_URL = 'http://192.168.1.3:5000/api';
 
 const apiRequest = async (endpoint, method = 'GET', body = null) => {
   try {
