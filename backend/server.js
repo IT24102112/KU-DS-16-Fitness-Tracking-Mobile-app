@@ -26,8 +26,10 @@ app.use((req, _res, next) => {
 });
 
 // Routes
-app.use('/api/auth',     require('./routes/authRoutes'));
-app.use('/api/workouts', require('./routes/workoutRoutes'));
+app.use('/api/auth',      require('./routes/authRoutes'));
+app.use('/api/workouts',  require('./routes/workoutRoutes'));
+app.use('/api/nutrition', require('./routes/nutritionRoutes'));
+app.use('/api/users',     require('./routes/userRoutes'));
 
 // User routes below later:
 // app.use('/api/diet-plans', require('./routes/dietPlanRoutes'));
