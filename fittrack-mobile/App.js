@@ -24,6 +24,13 @@ import AdminUserDetailScreen from './src/screens/admin/AdminUserDetailScreen';
 import AdminWorkoutsScreen from './src/screens/admin/AdminWorkoutsScreen';
 import AdminWorkoutDetailScreen from './src/screens/admin/AdminWorkoutDetailScreen';
 
+//Nutrition screens
+import NutritionHomeScreen from './src/screens/nutrition/NutritionHomeScreen';
+import AddMealScreen from './src/screens/nutrition/AddMealScreen';
+import EditMealScreen from './src/screens/nutrition/EditMealScreen';
+import MealDetailScreen from './src/screens/nutrition/MealDetailScreen';
+
+
 const Stack = createStackNavigator();
 
 function AuthStack() {
@@ -43,7 +50,12 @@ function UserStack() {
       <Stack.Screen name="WorkoutList" component={WorkoutListScreen} />
       <Stack.Screen name="WorkoutDetail" component={WorkoutDetailScreen} />
       <Stack.Screen name="WorkoutForm" component={WorkoutFormScreen} />
-      {/* Team members add their screens here */}
+      
+      {/* Nutrition Screens - IT24100199 */}
+      <Stack.Screen name="NutritionHome" component={NutritionHomeScreen} />
+      <Stack.Screen name="AddMeal" component={AddMealScreen} />
+      <Stack.Screen name="EditMeal" component={EditMealScreen} />
+      <Stack.Screen name="MealDetail" component={MealDetailScreen} />
     </Stack.Navigator>
   );
 }
