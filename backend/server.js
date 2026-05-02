@@ -3,12 +3,11 @@ dns.setServers(['8.8.8.8', '8.8.4.4']);
 
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 
 dotenv.config();
-
-// Connect to MongoDB
 connectDB();
 
 const app = express();
@@ -17,7 +16,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/uploads', express.static('uploads'));
+
+// Serve uploaded images statically
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Request logger
 app.use((req, _res, next) => {
@@ -26,15 +27,11 @@ app.use((req, _res, next) => {
 });
 
 // Routes
-app.use('/api/auth',     require('./routes/authRoutes'));
-//app.use('/api/workouts', require('./routes/workoutRoutes'));
+app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/workouts', require('./routes/workoutRoutes'));
+app.use('/api/exercises', require('./routes/exerciseRoutes'));
+app.use('/api/nutrition', require('./routes/nutritionRoutes'));
 app.use('/api/progress', require('./routes/progressRoutes'));
-
-// User routes below later:
-// app.use('/api/diet-plans', require('./routes/dietPlanRoutes'));
-// app.use('/api/exercises', require('./routes/exerciseRoutes'));
-// app.use('/api/goals',      require('./routes/goalRoutes'));
-// app.use('/api/reports',    require('./routes/reportRoutes'));
 
 // Health check
 app.get('/', (_req, res) => res.json({ message: 'FitTrack API is running', status: 'OK' }));

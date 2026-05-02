@@ -172,9 +172,9 @@ export default function HomeScreen({ navigation }) {
         <ModuleCard icon="💪" title="Workouts" subtitle="Plan & track sessions" color="#10B981" theme={theme}
           onPress={() => navigation.navigate('WorkoutList')} />
         <ModuleCard icon="🥗" title="Diet Plans" subtitle="Nutrition & meal plans" color="#F59E0B" theme={theme}
-          onPress={() => Alert.alert('Coming Soon', 'Diet Plans — being built by the team.')} />
+          onPress={() => navigation.navigate('NutritionHome')} />
         <ModuleCard icon="🏃" title="Exercises" subtitle="Exercise library" color="#6366F1" theme={theme}
-          onPress={() => Alert.alert('Coming Soon', 'Exercise management — being built by the team.')} />
+          onPress={() => navigation.navigate('ExerciseList')} />
         <ModuleCard icon="📈" title="Progress Tracking" subtitle="Track your journey" color="#3B82F6" theme={theme}
           onPress={() => navigation.navigate('ProgressList')} />
         <ModuleCard icon="🎯" title="Fitness Goals" subtitle="Set & achieve goals" color="#EC4899" theme={theme}

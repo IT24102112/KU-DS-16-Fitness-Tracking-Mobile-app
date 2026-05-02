@@ -1,12 +1,15 @@
 import { LineChart } from 'react-native-chart-kit';
 import { Dimensions } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity,
   StyleSheet, Alert, ActivityIndicator, RefreshControl
 } from 'react-native';
-import { useTheme } from '../services/ThemeContext';
-import apiRequest from '../services/api';
+import { useFocusEffect } from '@react-navigation/native';
+import { useTheme } from '../../services/ThemeContext';
+import apiRequest from '../../services/api';
+import BackToHomeButton from '../../components/BackToHomeButton';
+import ThemeToggleButton from '../../components/ThemeToggleButton';
 
 export default function ProgressListScreen({ navigation }) {
   const { theme } = useTheme();
@@ -14,22 +17,29 @@ export default function ProgressListScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const fetchProgress = async () => {
+  const fetchProgress = useCallback(async () => {
     try {
       const res = await apiRequest('/progress');
-      setProgressList(res.data || res);
+      // The API returns { success, data } now, but previously the code expected array directly.
+      // We'll handle both.
+      const data = res.data || res;
+      setProgressList(Array.isArray(data) ? data : data.data || []);
     } catch (e) {
       Alert.alert('Error', e.message);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, []);
 
-  useEffect(() => { fetchProgress(); }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchProgress();
+    }, [fetchProgress])
+  );
 
   const handleDelete = (id) => {
-    Alert.alert('Delete Entry', 'Are you sure you want to delete this progress entry?', [
+    Alert.alert('Delete Entry', 'Are you sure?', [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Delete', style: 'destructive',
@@ -53,7 +63,6 @@ export default function ProgressListScreen({ navigation }) {
             📅 {new Date(item.date).toLocaleDateString()}
           </Text>
         </View>
-        <Text style={[styles.userText, { color: theme.textMuted }]}>👤 {item.userId}</Text>
       </View>
 
       <View style={styles.statsRow}>
@@ -98,8 +107,12 @@ export default function ProgressListScreen({ navigation }) {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.bg }]}>
-    {/* Header */}
+      {/* Header */}
       <View style={[styles.header, { backgroundColor: theme.headerBg, borderBottomColor: theme.border }]}>
+        <View style={styles.headerTop}>
+          <BackToHomeButton goHome />
+          <ThemeToggleButton />
+        </View>
         <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>📈 Progress Tracking</Text>
         <Text style={[styles.headerSub, { color: theme.textMuted }]}>{progressList.length} entries logged</Text>
       </View>
@@ -137,7 +150,7 @@ export default function ProgressListScreen({ navigation }) {
             keyExtractor={(item) => item._id}
             renderItem={renderItem}
             contentContainerStyle={{ padding: 16 }}
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchProgress(); }} />}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchProgress(); }} tintColor={theme.accent} />}
             ListEmptyComponent={
               <View style={[styles.emptyCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
                 <Text style={styles.emptyIcon}>📊</Text>
@@ -163,13 +176,13 @@ export default function ProgressListScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   header: { paddingTop: 52, paddingBottom: 20, paddingHorizontal: 20, borderBottomWidth: 1, marginBottom: 4 },
+  headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
   headerTitle: { fontSize: 24, fontWeight: '800' },
   headerSub: { fontSize: 13, marginTop: 4 },
   card: { borderRadius: 16, padding: 16, marginBottom: 12, borderWidth: 1, borderLeftWidth: 4 },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   dateBadge: { borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 },
   dateText: { fontSize: 12, fontWeight: '700' },
-  userText: { fontSize: 12 },
   statsRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12, gap: 6 },
   statBox: { flex: 1, alignItems: 'center', padding: 10, borderRadius: 12, borderWidth: 1 },
   statValue: { fontSize: 18, fontWeight: '800' },

@@ -1,8 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export const API_BASE_URL = 'http://192.168.1.3:5000/api';
+export const API_BASE_URL = 'http://10.166.23.68:5000/api';
 
-const apiRequest = async (endpoint, method = 'GET', body = null) => {
+const apiRequest = async (endpoint, method = 'GET', body = null, isFormData = false) => {
   try {
     console.log('=== API REQUEST ===');
     console.log('Endpoint:', endpoint);
@@ -10,11 +10,16 @@ const apiRequest = async (endpoint, method = 'GET', body = null) => {
     console.log('Body:', JSON.stringify(body));
 
     const token = await AsyncStorage.getItem('userToken');
-    const headers = { 'Content-Type': 'application/json' };
+    const headers = {};
+    if (!isFormData) {
+      headers['Content-Type'] = 'application/json';
+    }
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
     const config = { method, headers };
-    if (body) config.body = JSON.stringify(body);
+    if (body) {
+      config.body = isFormData ? body : JSON.stringify(body);
+    }
 
     const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
     console.log('Response status:', response.status);
@@ -29,7 +34,6 @@ const apiRequest = async (endpoint, method = 'GET', body = null) => {
   } catch (error) {
     console.log('=== API ERROR ===');
     console.log('Error message:', error.message);
-    console.log('Error stack:', error.stack);
     throw error;
   }
 };

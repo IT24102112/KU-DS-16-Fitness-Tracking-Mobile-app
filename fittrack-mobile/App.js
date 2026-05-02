@@ -7,19 +7,31 @@ import { AuthProvider, useAuth } from './src/services/AuthContext';
 import { ThemeProvider, useTheme } from './src/services/ThemeContext';
 
 // Auth screens
+import LandingScreen from './src/screens/LandingScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
 
 // User screens
 import HomeScreen from './src/screens/HomeScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
-//import WorkoutListScreen from './src/screens/workout/WorkoutListScreen';
-//import WorkoutFormScreen from './src/screens/workout/WorkoutFormScreen';
-//import WorkoutDetailScreen from './src/screens/workout/WorkoutDetailScreen';
+import WorkoutListScreen from './src/screens/workout/WorkoutListScreen';
+import WorkoutFormScreen from './src/screens/workout/WorkoutFormScreen';
+import WorkoutDetailScreen from './src/screens/workout/WorkoutDetailScreen';
 
-// Progress screens
-import ProgressListScreen from './src/screens/ProgressListScreen';
-import ProgressFormScreen from './src/screens/ProgressFormScreen';
+// Exercise screens
+import ExerciseListScreen from './src/screens/exercise/ExerciseListScreen';
+import ExerciseDetailScreen from './src/screens/exercise/ExerciseDetailScreen';
+import ExerciseFormScreen from './src/screens/exercise/ExerciseFormScreen';
+
+// Nutrition screens (user)
+import NutritionHomeScreen from './src/screens/nutrition/NutritionHomeScreen';
+import AddMealScreen from './src/screens/nutrition/AddMealScreen';
+import EditMealScreen from './src/screens/nutrition/EditMealScreen';
+import MealDetailScreen from './src/screens/nutrition/MealDetailScreen';
+
+// Progress screens (user)
+import ProgressListScreen from './src/screens/progress/ProgressListScreen';
+import ProgressFormScreen from './src/screens/progress/ProgressFormScreen';
 
 // Admin screens
 import AdminDashboard from './src/screens/admin/AdminDashboard';
@@ -27,12 +39,22 @@ import AdminUsersScreen from './src/screens/admin/AdminUsersScreen';
 import AdminUserDetailScreen from './src/screens/admin/AdminUserDetailScreen';
 import AdminWorkoutsScreen from './src/screens/admin/AdminWorkoutsScreen';
 import AdminWorkoutDetailScreen from './src/screens/admin/AdminWorkoutDetailScreen';
+import AdminWorkoutFormScreen from './src/screens/admin/AdminWorkoutFormScreen';
+
+// Admin Nutrition screens
+import AdminNutritionScreen from './src/screens/admin/AdminNutritionScreen';   
+import AdminNutritionFormScreen from './src/screens/admin/AdminNutritionFormScreen'; 
+
+// Admin progress screens
+import AdminProgressScreen from './src/screens/admin/AdminProgressScreen';
+import AdminProgressFormScreen from './src/screens/admin/AdminProgressFormScreen';
 
 const Stack = createStackNavigator();
 
 function AuthStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Landing" component={LandingScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
     </Stack.Navigator>
@@ -44,10 +66,22 @@ function UserStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Home" component={HomeScreen} />
       <Stack.Screen name="Profile" component={ProfileScreen} />
-      {/* <Stack.Screen name="WorkoutList" component={WorkoutListScreen} /> */}
-      {/* <Stack.Screen name="WorkoutDetail" component={WorkoutDetailScreen} /> */}
-      {/* <Stack.Screen name="WorkoutForm" component={WorkoutFormScreen} /> */}
-      {/* Progress Tracking Screens */}
+      <Stack.Screen name="WorkoutList" component={WorkoutListScreen} />
+      <Stack.Screen name="WorkoutDetail" component={WorkoutDetailScreen} />
+      <Stack.Screen name="WorkoutForm" component={WorkoutFormScreen} />
+
+      {/* Exercise screens */}
+      <Stack.Screen name="ExerciseList" component={ExerciseListScreen} />
+      <Stack.Screen name="ExerciseDetail" component={ExerciseDetailScreen} />
+      <Stack.Screen name="ExerciseForm" component={ExerciseFormScreen} />
+
+      {/* Nutrition screens */}
+      <Stack.Screen name="NutritionHome" component={NutritionHomeScreen} />
+      <Stack.Screen name="AddMeal" component={AddMealScreen} />
+      <Stack.Screen name="EditMeal" component={EditMealScreen} />
+      <Stack.Screen name="MealDetail" component={MealDetailScreen} />
+
+      {/* Progress screens */}
       <Stack.Screen name="ProgressList" component={ProgressListScreen} />
       <Stack.Screen name="ProgressForm" component={ProgressFormScreen} />
     </Stack.Navigator>
@@ -62,6 +96,21 @@ function AdminStack() {
       <Stack.Screen name="AdminUserDetail" component={AdminUserDetailScreen} />
       <Stack.Screen name="AdminWorkouts" component={AdminWorkoutsScreen} />
       <Stack.Screen name="AdminWorkoutDetail" component={AdminWorkoutDetailScreen} />
+      <Stack.Screen name="AdminWorkoutForm" component={AdminWorkoutFormScreen} />
+
+      {/* Exercise screens – for admin exercise management */}
+      <Stack.Screen name="ExerciseList" component={ExerciseListScreen} />
+      <Stack.Screen name="ExerciseDetail" component={ExerciseDetailScreen} />
+      <Stack.Screen name="ExerciseForm" component={ExerciseFormScreen} />
+
+      {/* Admin Nutrition screens – for admin diet plan management */}
+      <Stack.Screen name="AdminNutrition" component={AdminNutritionScreen} />
+      <Stack.Screen name="AdminNutritionForm" component={AdminNutritionFormScreen} />
+
+      {/* Admin progress screens */}
+      <Stack.Screen name="AdminProgress" component={AdminProgressScreen} />
+      <Stack.Screen name="AdminProgressForm" component={AdminProgressFormScreen} />
+    
     </Stack.Navigator>
   );
 }
@@ -80,12 +129,7 @@ function AppNavigator() {
 
   return (
     <NavigationContainer>
-      {!user
-        ? <AuthStack />
-        : user.role === 'admin'
-          ? <AdminStack />
-          : <UserStack />
-      }
+      {!user ? <AuthStack /> : user.role === 'admin' ? <AdminStack /> : <UserStack />}
     </NavigationContainer>
   );
 }
