@@ -122,4 +122,59 @@ const completeWorkout = async (req, res) => {
   }
 };
 
-module.exports = { getWorkouts, getWorkout, createWorkout, updateWorkout, deleteWorkout, completeWorkout };
+// ─── ADMIN FUNCTIONS ────────────────────────────────────────
+
+// @desc    Create workout for any user (admin)
+// @route   POST /api/workouts/admin
+// @access  Private/Admin
+const adminCreateWorkout = async (req, res) => {
+  try {
+    const { userId, ...workoutData } = req.body;
+    if (!userId) {
+      return res.status(400).json({ success: false, message: 'User ID is required' });
+    }
+    workoutData.user = userId;
+    const workout = await Workout.create(workoutData);
+    res.status(201).json({ success: true, data: workout });
+  } catch (error) {
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(e => e.message);
+      return res.status(400).json({ success: false, message: messages.join(', ') });
+    }
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Update any workout (admin)
+// @route   PUT /api/workouts/admin/:id
+// @access  Private/Admin
+const adminUpdateWorkout = async (req, res) => {
+  try {
+    const workout = await Workout.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+    if (!workout) {
+      return res.status(404).json({ success: false, message: 'Workout not found' });
+    }
+    res.status(200).json({ success: true, data: workout });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+module.exports = {
+  getWorkouts,
+  getWorkout,
+  createWorkout,
+  updateWorkout,
+  deleteWorkout,
+  completeWorkout,
+  adminCreateWorkout,
+  adminUpdateWorkout,
+};
+
+
+
+//module.exports = { getWorkouts, getWorkout, createWorkout, updateWorkout, deleteWorkout, completeWorkout };
