@@ -6,7 +6,7 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from '../../services/ThemeContext';
-import apiRequest from '../../services/api';
+import apiRequest, { API_BASE_URL } from '../../services/api';
 import ThemeToggleButton from '../../components/ThemeToggleButton';
 
 export default function AdminProgressFormScreen({ navigation, route }) {
@@ -21,11 +21,15 @@ export default function AdminProgressFormScreen({ navigation, route }) {
   const [waist, setWaist] = useState(editItem?.waist?.toString() || '');
   const [hips, setHips] = useState(editItem?.hips?.toString() || '');
   const [notes, setNotes] = useState(editItem?.notes || '');
+
+  // Image states (same pattern as user form)
   const [image, setImage] = useState(null);
+  const [existingImage, setExistingImage] = useState(editItem?.image || null);
+  const [keepExistingImage, setKeepExistingImage] = useState(true);
 
   // User picker
   const [users, setUsers] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(editItem?.user || null);
+  const [selectedUser, setSelectedUser] = useState(null);
   const [userSearch, setUserSearch] = useState('');
   const [showUserPicker, setShowUserPicker] = useState(false);
 
@@ -35,9 +39,10 @@ export default function AdminProgressFormScreen({ navigation, route }) {
         const res = await apiRequest('/auth/admin/users');
         setUsers(res.data || []);
         if (isEditing && editItem?.user) {
-          // Ensure selectedUser is set from edit item (populated user object)
-          const existingUser = res.data.find(u => u._id === editItem.user._id || u._id === editItem.user);
-          if (existingUser) setSelectedUser(existingUser);
+          const userId = typeof editItem.user === 'object' ? editItem.user._id : editItem.user;
+          const found = res.data.find(u => u._id === userId);
+          if (found) setSelectedUser(found);
+          else setSelectedUser({ _id: userId, name: 'Unknown', email: '' });
         }
       } catch (e) { Alert.alert('Error', e.message); }
     };
@@ -58,16 +63,28 @@ export default function AdminProgressFormScreen({ navigation, route }) {
     });
     if (!result.canceled) {
       setImage(result.assets[0]);
+      setKeepExistingImage(false);
     }
   };
 
+  const removeImage = () => {
+    setImage(null);
+    setExistingImage(null);
+    setKeepExistingImage(false);
+  };
+
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return null;
+    return API_BASE_URL.replace('/api', '') + '/' + imagePath;
+  };
+
   const handleSubmit = async () => {
-    if (!selectedUser && !isEditing) {
-      Alert.alert('Error', 'Please select a user');
-      return;
-    }
     if (!weight || !calories) {
       Alert.alert('Error', 'Weight and Calories are required!');
+      return;
+    }
+    if (!isEditing && !selectedUser) {
+      Alert.alert('Error', 'Please select a user');
       return;
     }
     setLoading(true);
@@ -80,22 +97,24 @@ export default function AdminProgressFormScreen({ navigation, route }) {
       if (waist) formData.append('waist', waist);
       if (hips) formData.append('hips', hips);
       if (notes) formData.append('notes', notes);
-      if (image) {
-        formData.append('image', {
-          uri: image.uri,
-          type: 'image/jpeg',
-          name: 'progress.jpg',
-        });
+
+      if (!keepExistingImage) {
+        if (image) {
+          formData.append('image', {
+            uri: image.uri,
+            type: 'image/jpeg',
+            name: 'progress.jpg',
+          });
+        } else {
+          formData.append('image', ''); // clear image
+        }
       }
 
-      const url = isEditing
-        ? `/progress/admin/${editItem._id}`
-        : '/progress/admin';
+      const url = isEditing ? `/progress/admin/${editItem._id}` : '/progress/admin';
       const method = isEditing ? 'PUT' : 'POST';
 
-      await apiRequest(url, method, formData, true); // true = isFormData
-
-      Alert.alert('Success', isEditing ? '✅ Progress updated!' : '✅ Progress logged!');
+      await apiRequest(url, method, formData, true);
+      Alert.alert('Success', isEditing ? 'Progress updated!' : 'Progress logged!');
       navigation.goBack();
     } catch (e) {
       Alert.alert('Error', e.message);
@@ -124,7 +143,7 @@ export default function AdminProgressFormScreen({ navigation, route }) {
         </Text>
       </View>
 
-      {/* User Selector (only when adding new, not editing) */}
+      {/* User selector */}
       {!isEditing && (
         <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
           <Text style={[styles.sectionTitle, { color: theme.admin }]}>👤 Select User *</Text>
@@ -199,7 +218,7 @@ export default function AdminProgressFormScreen({ navigation, route }) {
         <Text style={[styles.sectionTitle, { color: theme.accent }]}>📝 Notes (optional)</Text>
         <TextInput
           style={[styles.input, styles.notesInput, { backgroundColor: theme.inputBg, borderColor: theme.border, color: theme.textPrimary }]}
-          placeholder="How are you feeling today?"
+          placeholder="How are they feeling?"
           placeholderTextColor={theme.textMuted}
           value={notes}
           onChangeText={setNotes}
@@ -210,6 +229,20 @@ export default function AdminProgressFormScreen({ navigation, route }) {
       {/* Image Upload */}
       <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
         <Text style={[styles.sectionTitle, { color: theme.admin }]}>📸 Progress Photo (optional)</Text>
+
+        {(existingImage && keepExistingImage) && (
+          <View style={{ alignItems: 'center', marginBottom: 10 }}>
+            <Image
+              source={{ uri: getImageUrl(existingImage) }}
+              style={styles.previewImage}
+              resizeMode="cover"
+            />
+            <TouchableOpacity onPress={() => { setKeepExistingImage(false); setExistingImage(null); }}>
+              <Text style={[styles.removeImage, { color: theme.dangerText }]}>✕ Remove photo</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
         <TouchableOpacity
           style={[styles.imagePicker, { borderColor: theme.border, backgroundColor: theme.inputBg }]}
           onPress={pickImage}
@@ -219,7 +252,9 @@ export default function AdminProgressFormScreen({ navigation, route }) {
           ) : (
             <View style={styles.imagePlaceholder}>
               <Text style={styles.imageIcon}>📷</Text>
-              <Text style={[styles.imageText, { color: theme.textMuted }]}>Tap to select photo</Text>
+              <Text style={[styles.imageText, { color: theme.textMuted }]}>
+                {existingImage && keepExistingImage ? 'Tap to replace photo' : 'Tap to select photo'}
+              </Text>
             </View>
           )}
         </TouchableOpacity>
@@ -243,12 +278,7 @@ export default function AdminProgressFormScreen({ navigation, route }) {
       </TouchableOpacity>
 
       {/* ── USER PICKER MODAL ── */}
-      <Modal
-        visible={showUserPicker}
-        animationType="slide"
-        transparent
-        onRequestClose={() => setShowUserPicker(false)}
-      >
+      <Modal visible={showUserPicker} animationType="slide" transparent onRequestClose={() => setShowUserPicker(false)}>
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
             <View style={styles.modalHeader}>
@@ -294,7 +324,6 @@ const styles = StyleSheet.create({
   card: { margin: 16, marginBottom: 4, padding: 16, borderRadius: 16, borderWidth: 1 },
   sectionTitle: { fontSize: 15, fontWeight: '800', marginBottom: 14 },
   label: { fontSize: 13, fontWeight: '600', marginBottom: 6 },
-  userSelector: { borderWidth: 1, borderRadius: 10, padding: 12, marginTop: 4 },
   input: { borderWidth: 1, borderRadius: 10, padding: 12, fontSize: 15, marginBottom: 14 },
   notesInput: { height: 90, textAlignVertical: 'top' },
   imagePicker: { borderWidth: 1, borderRadius: 12, borderStyle: 'dashed', overflow: 'hidden' },
@@ -303,9 +332,9 @@ const styles = StyleSheet.create({
   imageIcon: { fontSize: 36, marginBottom: 8 },
   imageText: { fontSize: 14 },
   removeImage: { textAlign: 'center', marginTop: 8, fontSize: 13, fontWeight: '700' },
+  userSelector: { borderWidth: 1, borderRadius: 10, padding: 12, marginTop: 4 },
   submitBtn: { margin: 16, padding: 16, borderRadius: 14, alignItems: 'center', marginBottom: 40 },
   submitText: { color: '#fff', fontSize: 16, fontWeight: '800' },
-
   // Modal styles
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
   modalContent: { borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, maxHeight: '80%' },

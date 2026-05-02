@@ -2,10 +2,10 @@ import React, { useState, useCallback } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity,
   StyleSheet, ActivityIndicator, Alert,
-  RefreshControl, TextInput,
+  RefreshControl, TextInput, Image,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import apiRequest from '../../services/api';
+import apiRequest, { API_BASE_URL } from '../../services/api';
 import { useTheme } from '../../services/ThemeContext';
 import ThemeToggleButton from '../../components/ThemeToggleButton';
 
@@ -54,6 +54,11 @@ export default function AdminProgressScreen({ navigation }) {
     );
   });
 
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return null;
+    return API_BASE_URL.replace('/api', '') + '/' + imagePath;
+  };
+
   const renderItem = ({ item }) => (
     <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border, borderLeftColor: theme.blue }]}>
       <View style={styles.cardHeader}>
@@ -88,6 +93,17 @@ export default function AdminProgressScreen({ navigation }) {
 
       {item.notes ? (
         <Text style={[styles.notes, { color: theme.textSecondary }]}>📝 {item.notes}</Text>
+      ) : null}
+
+      {/* Image thumbnail */}
+      {item.image ? (
+        <View style={styles.imageWrap}>
+          <Image
+            source={{ uri: getImageUrl(item.image) }}
+            style={styles.thumbnail}
+            resizeMode="cover"
+          />
+        </View>
       ) : null}
 
       <View style={styles.buttonRow}>
@@ -180,6 +196,8 @@ const styles = StyleSheet.create({
   statValue: { fontSize: 18, fontWeight: '800' },
   statLabel: { fontSize: 10, marginTop: 2 },
   notes: { fontSize: 13, marginBottom: 12, lineHeight: 18 },
+  imageWrap: { alignItems: 'center', marginBottom: 12 },
+  thumbnail: { width: 120, height: 120, borderRadius: 10 },
   buttonRow: { flexDirection: 'row', gap: 8 },
   editBtn: { flex: 1, padding: 10, borderRadius: 10, alignItems: 'center', borderWidth: 1 },
   editText: { fontWeight: '700', fontSize: 13 },

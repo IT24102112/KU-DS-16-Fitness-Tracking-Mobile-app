@@ -1,5 +1,5 @@
 import { LineChart } from 'react-native-chart-kit';
-import { Dimensions } from 'react-native';
+import { Dimensions, Image } from 'react-native';
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity,
@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../services/ThemeContext';
-import apiRequest from '../../services/api';
+import apiRequest, { API_BASE_URL } from '../../services/api';
 import BackToHomeButton from '../../components/BackToHomeButton';
 import ThemeToggleButton from '../../components/ThemeToggleButton';
 
@@ -20,8 +20,6 @@ export default function ProgressListScreen({ navigation }) {
   const fetchProgress = useCallback(async () => {
     try {
       const res = await apiRequest('/progress');
-      // The API returns { success, data } now, but previously the code expected array directly.
-      // We'll handle both.
       const data = res.data || res;
       setProgressList(Array.isArray(data) ? data : data.data || []);
     } catch (e) {
@@ -55,6 +53,11 @@ export default function ProgressListScreen({ navigation }) {
     ]);
   };
 
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return null;
+    return API_BASE_URL.replace('/api', '') + '/' + imagePath;
+  };
+
   const renderItem = ({ item }) => (
     <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border, borderLeftColor: theme.blue }]}>
       <View style={styles.cardHeader}>
@@ -86,6 +89,17 @@ export default function ProgressListScreen({ navigation }) {
 
       {item.notes ? (
         <Text style={[styles.notes, { color: theme.textSecondary }]}>📝 {item.notes}</Text>
+      ) : null}
+
+      {/* Image thumbnail */}
+      {item.image ? (
+        <View style={styles.imageWrap}>
+          <Image
+            source={{ uri: getImageUrl(item.image) }}
+            style={styles.thumbnail}
+            resizeMode="cover"
+          />
+        </View>
       ) : null}
 
       <View style={styles.buttonRow}>
@@ -188,6 +202,8 @@ const styles = StyleSheet.create({
   statValue: { fontSize: 18, fontWeight: '800' },
   statLabel: { fontSize: 10, marginTop: 2 },
   notes: { fontSize: 13, marginBottom: 12, lineHeight: 18 },
+  imageWrap: { alignItems: 'center', marginBottom: 12 },
+  thumbnail: { width: 120, height: 120, borderRadius: 10 },
   buttonRow: { flexDirection: 'row', gap: 8 },
   editBtn: { flex: 1, padding: 10, borderRadius: 10, alignItems: 'center', borderWidth: 1 },
   editText: { fontWeight: '700', fontSize: 13 },
