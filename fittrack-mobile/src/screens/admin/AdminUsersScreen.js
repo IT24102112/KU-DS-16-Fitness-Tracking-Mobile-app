@@ -63,10 +63,7 @@ export default function AdminUsersScreen({ navigation }) {
           onPress={() => navigation.navigate('AdminUserDetail', { userId: item._id })}>
           <Text style={[styles.viewBtnText, { color: theme.blueText }]}>👁️  View & Edit</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.workoutsBtn, { backgroundColor: theme.accentLight, borderColor: theme.accentBorder }]}
-          onPress={() => navigation.navigate('AdminWorkouts', { userId: item._id, userName: item.name })}>
-          <Text style={[styles.workoutsBtnText, { color: theme.accent }]}>💪  Workouts</Text>
-        </TouchableOpacity>
+        {/* Removed the "Workouts" button – use the separate Workout Management module */}
         <TouchableOpacity style={[styles.deleteBtn, { backgroundColor: theme.danger, borderColor: theme.dangerBorder + '33' }]}
           onPress={() => handleDelete(item._id, item.name)}>
           <Text style={styles.deleteBtnText}>🗑️</Text>
@@ -123,8 +120,6 @@ const styles = StyleSheet.create({
   cardActions: { flexDirection: 'row', gap: 7 },
   viewBtn: { flex: 2, borderRadius: 9, padding: 8, alignItems: 'center', borderWidth: 1 },
   viewBtnText: { fontSize: 11, fontWeight: '700' },
-  workoutsBtn: { flex: 2, borderRadius: 9, padding: 8, alignItems: 'center', borderWidth: 1 },
-  workoutsBtnText: { fontSize: 11, fontWeight: '700' },
   deleteBtn: { borderRadius: 9, padding: 8, alignItems: 'center', paddingHorizontal: 12, borderWidth: 1 },
   deleteBtnText: { fontSize: 13 },
   empty: { alignItems: 'center', marginTop: 80 },

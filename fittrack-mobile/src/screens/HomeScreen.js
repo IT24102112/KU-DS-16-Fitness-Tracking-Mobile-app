@@ -88,6 +88,16 @@ export default function HomeScreen({ navigation }) {
   const levelColor = { beginner: '#10B981', intermediate: '#F59E0B', advanced: '#EF4444' }[user?.fitnessLevel] || '#10B981';
   const STATUS_COLORS = { planned: '#6366F1', in_progress: '#F59E0B', completed: '#10B981', skipped: '#EF4444' };
 
+  // Safe navigation function with error handling
+  const handleNavigation = (screenName) => {
+    try {
+      navigation.navigate(screenName);
+    } catch (error) {
+      console.log(`Navigation to ${screenName} failed:`, error);
+      Alert.alert('Coming Soon', `${screenName} feature is being developed.`);
+    }
+  };
+
   return (
     <ScrollView style={[styles.container, { backgroundColor: theme.bg }]} showsVerticalScrollIndicator={false}>
 
@@ -111,7 +121,7 @@ export default function HomeScreen({ navigation }) {
             <ThemeToggleButton />
             <TouchableOpacity
               style={[styles.profileBtn, { backgroundColor: theme.card, borderColor: theme.border }]}
-              onPress={() => navigation.navigate('Profile')}
+              onPress={() => handleNavigation('Profile')}
             >
               <Text style={[styles.profileBtnText, { color: theme.textSecondary }]}>👤  Profile</Text>
             </TouchableOpacity>
@@ -149,7 +159,7 @@ export default function HomeScreen({ navigation }) {
           </View> : null}
           <TouchableOpacity
             style={[styles.editChip, { backgroundColor: theme.accentLight, borderColor: theme.accentBorder }]}
-            onPress={() => navigation.navigate('Profile')}
+            onPress={() => handleNavigation('Profile')}
           >
             <Text style={[styles.editChipText, { color: theme.accent }]}>✏️  Edit Profile</Text>
           </TouchableOpacity>
@@ -170,24 +180,28 @@ export default function HomeScreen({ navigation }) {
       <View style={styles.section}>
         <Text style={[styles.sectionHeading, { color: theme.textPrimary }]}>⚡ Your Modules</Text>
         <ModuleCard icon="💪" title="Workouts" subtitle="Plan & track sessions" color="#10B981" theme={theme}
-          onPress={() => navigation.navigate('WorkoutList')} />
+          onPress={() => handleNavigation('WorkoutList')} />
         <ModuleCard icon="🥗" title="Diet Plans" subtitle="Nutrition & meal plans" color="#F59E0B" theme={theme}
-          onPress={() => Alert.alert('Coming Soon', 'Diet Plans — being built by the team.')} />
+          onPress={() => handleNavigation('NutritionHome')} />
         <ModuleCard icon="🏃" title="Exercises" subtitle="Exercise library" color="#6366F1" theme={theme}
-          onPress={() => Alert.alert('Coming Soon', 'Exercise management — being built by the team.')} />
+          onPress={() => handleNavigation('ExerciseList')} />
         <ModuleCard icon="📈" title="Progress Tracking" subtitle="Track your journey" color="#3B82F6" theme={theme}
-          onPress={() => Alert.alert('Coming Soon', 'Progress Tracking — being built by the team.')} />
+          onPress={() => handleNavigation('ProgressList')} />
         <ModuleCard icon="🎯" title="Fitness Goals" subtitle="Set & achieve goals" color="#EC4899" theme={theme}
-          onPress={() => Alert.alert('Coming Soon', 'Fitness Goals — being built by the team.')} />
+          onPress={() => {
+            
+            handleNavigation('GoalScreen');
+            
+          }} />
         <ModuleCard icon="📸" title="Progress Reports" subtitle="Photos & reports" color="#8B5CF6" theme={theme}
-          onPress={() => Alert.alert('Coming Soon', 'Progress Reports — being built by the team.')} />
+          onPress={() => navigation.navigate('ProgressReport')} />
       </View>
 
       {/* RECENT WORKOUTS */}
       <View style={styles.section}>
         <View style={styles.sectionRow}>
           <Text style={[styles.sectionHeading, { color: theme.textPrimary }]}>🕐 Recent Workouts</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('WorkoutList')}>
+          <TouchableOpacity onPress={() => handleNavigation('WorkoutList')}>
             <Text style={[styles.seeAll, { color: theme.accent }]}>See all →</Text>
           </TouchableOpacity>
         </View>
@@ -196,7 +210,7 @@ export default function HomeScreen({ navigation }) {
         ) : recentWorkouts.length === 0 ? (
           <TouchableOpacity
             style={[styles.emptyCard, { backgroundColor: theme.card, borderColor: theme.border }]}
-            onPress={() => navigation.navigate('WorkoutForm', {})}
+            onPress={() => handleNavigation('WorkoutForm')}
           >
             <Text style={styles.emptyIcon}>🏋️</Text>
             <Text style={[styles.emptyText, { color: theme.textPrimary }]}>No workouts yet</Text>
@@ -207,7 +221,7 @@ export default function HomeScreen({ navigation }) {
             <TouchableOpacity
               key={w._id}
               style={[styles.recentCard, { backgroundColor: theme.card, borderColor: theme.border }]}
-              onPress={() => navigation.navigate('WorkoutDetail', { workoutId: w._id })}
+              onPress={() => handleNavigation('WorkoutDetail', { workoutId: w._id })}
             >
               <View style={[styles.recentBadge, { backgroundColor: (STATUS_COLORS[w.status] || '#6366F1') + '22' }]}>
                 <Text style={{ fontSize: 18 }}>
@@ -224,7 +238,7 @@ export default function HomeScreen({ navigation }) {
         )}
         <TouchableOpacity
           style={[styles.newWorkoutBtn, { backgroundColor: theme.accentLight, borderColor: theme.accentBorder }]}
-          onPress={() => navigation.navigate('WorkoutForm', {})}
+          onPress={() => handleNavigation('WorkoutForm')}
         >
           <Text style={[styles.newWorkoutBtnText, { color: theme.accent }]}>➕  New Workout</Text>
         </TouchableOpacity>

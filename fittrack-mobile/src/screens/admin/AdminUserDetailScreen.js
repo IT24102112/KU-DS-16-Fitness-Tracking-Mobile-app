@@ -1,4 +1,3 @@
-// AdminUserDetailScreen.js
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import apiRequest from '../../services/api';
@@ -102,11 +101,7 @@ export default function AdminUserDetailScreen({ route, navigation }) {
         </TouchableOpacity>
       </View>
 
-      <View style={{ marginHorizontal: 16, marginBottom: 40, gap: 10 }}>
-        <TouchableOpacity style={{ backgroundColor: theme.accentLight, borderRadius: 12, padding: 13, alignItems: 'center', borderWidth: 1, borderColor: theme.accentBorder }}
-          onPress={() => navigation.navigate('AdminWorkouts', { userId, userName: user?.name })}>
-          <Text style={{ color: theme.accent, fontSize: 13, fontWeight: '700' }}>💪  View This User's Workouts</Text>
-        </TouchableOpacity>
+      <View style={{ marginHorizontal: 16, marginBottom: 40 }}>
         <TouchableOpacity style={{ backgroundColor: theme.danger, borderRadius: 12, padding: 13, alignItems: 'center', borderWidth: 1, borderColor: theme.dangerBorder }} onPress={handleDelete}>
           <Text style={{ color: theme.dangerText, fontSize: 13, fontWeight: '700' }}>🗑️  Delete This User</Text>
         </TouchableOpacity>

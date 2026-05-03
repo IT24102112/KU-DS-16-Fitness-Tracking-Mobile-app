@@ -31,7 +31,6 @@ export default function AdminDashboard({ navigation }) {
   const { theme, isDark } = useTheme();
   const [stats, setStats] = useState({ totalUsers: 0, totalWorkouts: 0, completedWorkouts: 0, plannedWorkouts: 0 });
   const [recentUsers, setRecentUsers] = useState([]);
-  const [recentWorkouts, setRecentWorkouts] = useState([]);
   const [loading, setLoading] = useState(true);
   const headerAnim = useRef(new Animated.Value(-20)).current;
   const headerOpacity = useRef(new Animated.Value(0)).current;
@@ -46,14 +45,12 @@ export default function AdminDashboard({ navigation }) {
 
   const fetchData = async () => {
     try {
-      const [statsRes, usersRes, workoutsRes] = await Promise.all([
+      const [statsRes, usersRes] = await Promise.all([
         apiRequest('/auth/admin/stats'),
         apiRequest('/auth/admin/users'),
-        apiRequest('/auth/admin/workouts'),
       ]);
       setStats(statsRes.data || {});
       setRecentUsers((usersRes.data || []).slice(0, 4));
-      setRecentWorkouts((workoutsRes.data || []).slice(0, 4));
     } catch (e) {
       Alert.alert('Error', e.message);
     } finally {
@@ -68,8 +65,6 @@ export default function AdminDashboard({ navigation }) {
     ]);
 
   const LEVEL_COLORS = { beginner: '#10B981', intermediate: '#F59E0B', advanced: '#EF4444' };
-  const STATUS_COLORS = { completed: '#10B981', planned: '#6366F1', in_progress: '#F59E0B', skipped: '#EF4444' };
-  const STATUS_TEXT = { completed: '#10B981', planned: '#818CF8', in_progress: '#F59E0B', skipped: '#EF4444' };
 
   if (loading) {
     return (
@@ -82,7 +77,6 @@ export default function AdminDashboard({ navigation }) {
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: theme.bg }]} showsVerticalScrollIndicator={false}>
-
       {/* HEADER */}
       <Animated.View style={[
         styles.header,
@@ -90,7 +84,6 @@ export default function AdminDashboard({ navigation }) {
         { opacity: headerOpacity, transform: [{ translateY: headerAnim }] },
       ]}>
         {isDark && <View style={styles.adminGlow} />}
-
         <View style={styles.topBar}>
           <View style={[styles.adminBadge, { backgroundColor: theme.adminLight, borderColor: theme.adminBorder }]}>
             <Text style={[styles.adminBadgeText, { color: theme.adminText }]}>🛡️  ADMIN</Text>
@@ -106,7 +99,6 @@ export default function AdminDashboard({ navigation }) {
             </TouchableOpacity>
           </View>
         </View>
-
         <Text style={[styles.dashTitle, { color: theme.adminText }]}>Admin Dashboard</Text>
         <Text style={[styles.dashSubtitle, { color: theme.textMuted }]}>FitTrack System Management</Text>
       </Animated.View>
@@ -129,10 +121,11 @@ export default function AdminDashboard({ navigation }) {
         {[
           { icon: '👥', title: 'User Management', sub: 'View, edit, delete all users', color: '#3B82F6', live: true, screen: 'AdminUsers' },
           { icon: '💪', title: 'Workout Management', sub: "All users' workouts with CRUD", color: '#10B981', live: true, screen: 'AdminWorkouts' },
-          { icon: '🥗', title: 'Diet Plan Management', sub: "Manage all users' diet plans", color: '#F59E0B', live: false },
-          { icon: '🏃', title: 'Exercise Management', sub: 'Manage exercise library', color: '#6366F1', live: false },
-          { icon: '📈', title: 'Progress Tracking', sub: "View all users' progress", color: '#EC4899', live: false },
-          { icon: '🎯', title: 'Goals & Reports', sub: 'Goals + image progress reports', color: '#8B5CF6', live: false },
+          { icon: '🥗', title: 'Diet Plan Management', sub: "Manage all users' diet plans", color: '#F59E0B', live: true, screen: 'AdminNutrition' },
+          { icon: '🏃', title: 'Exercise Management', sub: 'Manage exercise library', color: '#6366F1', live: true, screen: 'ExerciseList' },
+          { icon: '📈', title: 'Progress Tracking', sub: "View all users' progress", color: '#EC4899', live: true, screen: 'AdminProgress' },
+          { icon: '🎯', title: 'Goal Management', sub: 'Manage all users\' fitness goals', color: '#8B5CF6', live: true, screen: 'AdminGoal' },
+          { icon: '📸', title: 'Progress Reports', sub: 'Photos & image reports', color: '#EC4899', live: false },
         ].map(m => (
           <TouchableOpacity
             key={m.title}
@@ -167,7 +160,7 @@ export default function AdminDashboard({ navigation }) {
       </View>
 
       {/* RECENT USERS */}
-      <View style={styles.section}>
+      <View style={[styles.section, { marginBottom: 40 }]}>
         <View style={styles.sectionRow}>
           <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>👥 Recent Users</Text>
           <TouchableOpacity onPress={() => navigation.navigate('AdminUsers')}>
@@ -192,31 +185,7 @@ export default function AdminDashboard({ navigation }) {
         ))}
       </View>
 
-      {/* RECENT WORKOUTS */}
-      <View style={[styles.section, { marginBottom: 40 }]}>
-        <View style={styles.sectionRow}>
-          <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>💪 Recent Workouts</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('AdminWorkouts')}>
-            <Text style={[styles.seeAll, { color: theme.admin }]}>See all →</Text>
-          </TouchableOpacity>
-        </View>
-        {recentWorkouts.map(w => (
-          <View key={w._id} style={[styles.workoutRow, { backgroundColor: theme.card, borderColor: theme.border }]}>
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.workoutTitle, { color: theme.textPrimary }]}>{w.title}</Text>
-              <Text style={[styles.workoutMeta, { color: theme.textMuted }]}>
-                {w.user?.name || 'Unknown'}  •  {w.durationMinutes} min  •  {w.category}
-              </Text>
-            </View>
-            <View style={[styles.statusPill, { backgroundColor: (STATUS_COLORS[w.status] || '#6366F1') + '33' }]}>
-              <Text style={[styles.statusPillText, { color: STATUS_TEXT[w.status] || '#818CF8' }]}>
-                {w.status?.replace('_', ' ')}
-              </Text>
-            </View>
-          </View>
-        ))}
-      </View>
-
+      {/* REMOVED: Recent Workouts section */}
     </ScrollView>
   );
 }
@@ -262,9 +231,4 @@ const styles = StyleSheet.create({
   userName: { fontSize: 14, fontWeight: '700' },
   userEmail: { fontSize: 12, marginTop: 2 },
   levelDot: { width: 10, height: 10, borderRadius: 5 },
-  workoutRow: { flexDirection: 'row', alignItems: 'center', borderRadius: 12, padding: 12, marginBottom: 8, borderWidth: 1 },
-  workoutTitle: { fontSize: 14, fontWeight: '700' },
-  workoutMeta: { fontSize: 11, marginTop: 3, textTransform: 'capitalize' },
-  statusPill: { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4 },
-  statusPillText: { fontSize: 10, fontWeight: '800', textTransform: 'capitalize' },
 });
